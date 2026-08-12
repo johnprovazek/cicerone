@@ -58,19 +58,14 @@ const NORMALIZED_BEERS = BEERS.map((beer) => ({
 }));
 
 // Settings section wrapper to handle accordion item styling and open/close state.
-function SettingsSectionWrapper({ section, index, openSettingsSections, children }) {
-  const isOpen = openSettingsSections.includes(section);
-  const prevIsOpen = index > 0 && openSettingsSections.includes(SETTINGS_SECTIONS[index - 1]);
-  const nextIsOpen =
-    index < SETTINGS_SECTIONS.length - 1 && openSettingsSections.includes(SETTINGS_SECTIONS[index + 1]);
-
+function SettingsSectionWrapper({ section, isOpen, prevIsOpen, nextIsOpen, isFirst, isLast, children }) {
   return (
     <Accordion.Item
       value={section}
-      mt={index > 0 && (isOpen || prevIsOpen) ? 8 : 0}
-      borderTopRadius={isOpen || index === 0 || prevIsOpen ? "2xl" : "none"}
-      borderBottomRadius={isOpen || index === SETTINGS_SECTIONS.length - 1 || nextIsOpen ? "2xl" : "none"}
-      borderBottomWidth={!isOpen && !nextIsOpen && index !== SETTINGS_SECTIONS.length - 1 ? 1 : 0}
+      mt={!isFirst && (isOpen || prevIsOpen) ? 8 : 0}
+      borderTopRadius={isOpen || isFirst || prevIsOpen ? "2xl" : "none"}
+      borderBottomRadius={isOpen || isLast || nextIsOpen ? "2xl" : "none"}
+      borderBottomWidth={!isOpen && !nextIsOpen && !isLast ? 1 : 0}
       borderBottomStyle="solid"
       borderColor="gray.200"
       bg="gray.50"
@@ -207,11 +202,12 @@ function CheckboxSection({ items, selectedIds, setSelectedIds, defaultSelectedId
                 const isSelected = selectedSet.has(item.id);
                 const checkboxIcon = isNoneSelected ? FaRegSquareCheck : isSelected ? FaSquareCheck : FaRegSquare;
                 return (
-                  <HStack key={item.id} h={{ base: 12, md: 10 }} w="100%" gap={3} justifyContent="flex-start">
+                  <HStack key={item.id} minH={{ base: 12, md: 10 }} w="100%" gap={3} justifyContent="flex-start">
                     <Checkbox.Root
                       checked={isSelected}
                       onCheckedChange={() => handleToggle(item.id)}
                       overflow="visible"
+                      flexShrink={0}
                     >
                       <Checkbox.HiddenInput />
                       <Checkbox.Control
@@ -235,12 +231,13 @@ function CheckboxSection({ items, selectedIds, setSelectedIds, defaultSelectedId
                         />
                       </Checkbox.Control>
                     </Checkbox.Root>
-                    <Icon as={item.labelIcon} boxSize={6} color={item.labelIconColor} />
+                    <Icon as={item.labelIcon} boxSize={6} color={item.labelIconColor} flexShrink={0} />
                     <Text
                       fontSize={{ base: "sm", md: "md" }}
                       fontWeight="medium"
                       color={item.textColor}
-                      whiteSpace="nowrap"
+                      whiteSpace="normal"
+                      lineHeight="short"
                     >
                       {item.label}
                     </Text>
@@ -323,6 +320,7 @@ export default function Settings({ onClose }) {
   const [showBackground, setShowBackground] = useLocalStorage(KEY_SHOW_TILES_BACKGROUND, DEFAULT_SHOW_TILES_BACKGROUND);
 
   const sections = isMobile ? SETTINGS_SECTIONS.filter((s) => s !== "Keyboard Controls") : SETTINGS_SECTIONS;
+  const openSet = new Set(openSettingsSections);
 
   const handleAccordionChange = (details) => {
     setOpenSettingsSections(details.value || []);
@@ -346,7 +344,7 @@ export default function Settings({ onClose }) {
       borderRadius="2xl"
       boxShadow="xl"
       position="relative"
-      p={12}
+      p={{ base: 6, md: 12 }}
       userSelect="none"
     >
       <Box
@@ -363,7 +361,13 @@ export default function Settings({ onClose }) {
       >
         <Icon as={FaXmark} boxSize={6} />
       </Box>
-      <Text fontSize={{ base: "2xl", md: "4xl" }} fontWeight="bold" color="gray.800" textAlign="center" mb={8}>
+      <Text
+        fontSize={{ base: "2xl", md: "4xl" }}
+        fontWeight="bold"
+        color="gray.800"
+        textAlign="center"
+        mb={{ base: 6, md: 8 }}
+      >
         Settings
       </Text>
       <Box w="100%">
@@ -374,33 +378,44 @@ export default function Settings({ onClose }) {
           value={openSettingsSections}
           onValueChange={handleAccordionChange}
         >
-          {sections.map((section, index) => (
-            <SettingsSectionWrapper
-              key={section}
-              section={section}
-              index={index}
-              openSettingsSections={openSettingsSections}
-            >
-              {section === "Study Fields" && (
-                <CheckboxSection
-                  items={NORMALIZED_STUDY_FIELDS}
-                  selectedIds={studyFields}
-                  setSelectedIds={setStudyFields}
-                  defaultSelectedIds={DEFAULT_STUDY_FIELDS}
-                />
-              )}
-              {section === "Beers" && (
-                <CheckboxSection
-                  items={NORMALIZED_BEERS}
-                  selectedIds={beers}
-                  setSelectedIds={setBeers}
-                  defaultSelectedIds={DEFAULT_BEERS}
-                />
-              )}
-              {section === "Keyboard Controls" && <ListSection items={KEYBOARD_CONTROLS} />}
-              {section === "Design" && <ListSection items={designItems} />}
-            </SettingsSectionWrapper>
-          ))}
+          {sections.map((section, index) => {
+            const isOpen = openSet.has(section);
+            const prevIsOpen = index > 0 && openSet.has(sections[index - 1]);
+            const nextIsOpen = index < sections.length - 1 && openSet.has(sections[index + 1]);
+            const isFirst = index === 0;
+            const isLast = index === sections.length - 1;
+
+            return (
+              <SettingsSectionWrapper
+                key={section}
+                section={section}
+                isOpen={isOpen}
+                prevIsOpen={prevIsOpen}
+                nextIsOpen={nextIsOpen}
+                isFirst={isFirst}
+                isLast={isLast}
+              >
+                {section === "Study Fields" && (
+                  <CheckboxSection
+                    items={NORMALIZED_STUDY_FIELDS}
+                    selectedIds={studyFields}
+                    setSelectedIds={setStudyFields}
+                    defaultSelectedIds={DEFAULT_STUDY_FIELDS}
+                  />
+                )}
+                {section === "Beers" && (
+                  <CheckboxSection
+                    items={NORMALIZED_BEERS}
+                    selectedIds={beers}
+                    setSelectedIds={setBeers}
+                    defaultSelectedIds={DEFAULT_BEERS}
+                  />
+                )}
+                {section === "Keyboard Controls" && <ListSection items={KEYBOARD_CONTROLS} />}
+                {section === "Design" && <ListSection items={designItems} />}
+              </SettingsSectionWrapper>
+            );
+          })}
         </Accordion.Root>
       </Box>
     </VStack>

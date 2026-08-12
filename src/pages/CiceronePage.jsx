@@ -97,17 +97,7 @@ export default function CiceronePage() {
   return (
     <>
       <BackgroundTiles glass={beer.glass} />
-      <Grid
-        position="fixed"
-        top={0}
-        left={0}
-        w="100vw"
-        h="100dvh"
-        placeItems="center"
-        overflowY="auto"
-        p={12}
-        scrollbarGutter="stable"
-      >
+      <Grid position="fixed" top={0} left={0} w="100vw" h="100dvh" placeItems="center" overflowY="auto" px={6} py={16}>
         <Box
           position={{ base: "absolute", md: "fixed" }}
           top={0}

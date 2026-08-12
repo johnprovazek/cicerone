@@ -1,4 +1,4 @@
-import { Box } from "@chakra-ui/react";
+import { Box, useBreakpointValue } from "@chakra-ui/react";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import {
   KEY_SHOW_TILES_BACKGROUND,
@@ -10,12 +10,12 @@ import {
   OUTLINE_COLOR,
 } from "../../lib/constants.js";
 
-const TILE_SIZE = 500;
-const PATTERN_SIZE = TILE_SIZE * 2;
 const OPACITY = 0.03;
 
 export default function BackgroundTiles({ glass }) {
   const [showTilesBackground] = useLocalStorage(KEY_SHOW_TILES_BACKGROUND, DEFAULT_SHOW_TILES_BACKGROUND);
+  const tileSize = useBreakpointValue({ base: 200, md: 500 }) ?? 500;
+  const patternSize = tileSize * 2;
 
   const { beer: beerPath, foam: foamPath, outline: outlinePath } = GLASSWARE_SVG_PATHS[glass];
 
@@ -23,8 +23,8 @@ export default function BackgroundTiles({ glass }) {
     <svg
       x={x}
       y={y}
-      width={TILE_SIZE}
-      height={TILE_SIZE}
+      width={tileSize}
+      height={tileSize}
       viewBox={`0 0 ${GLASSWARE_SVG_VIEWBOX_SIZE} ${GLASSWARE_SVG_VIEWBOX_SIZE}`}
       transform={rotation}
     >
@@ -41,15 +41,15 @@ export default function BackgroundTiles({ glass }) {
           <defs>
             <pattern
               id="beer-tiles"
-              width={PATTERN_SIZE}
-              height={PATTERN_SIZE}
+              width={patternSize}
+              height={patternSize}
               patternUnits="userSpaceOnUse"
               patternTransform="rotate(45)"
             >
               {renderGlass(0, 0)}
-              {renderGlass(TILE_SIZE, 0, `rotate(270 ${TILE_SIZE + TILE_SIZE / 2} ${TILE_SIZE / 2})`)}
-              {renderGlass(0, TILE_SIZE, `rotate(270 ${TILE_SIZE / 2} ${TILE_SIZE + TILE_SIZE / 2})`)}
-              {renderGlass(TILE_SIZE, TILE_SIZE)}
+              {renderGlass(tileSize, 0, `rotate(270 ${tileSize + tileSize / 2} ${tileSize / 2})`)}
+              {renderGlass(0, tileSize, `rotate(270 ${tileSize / 2} ${tileSize + tileSize / 2})`)}
+              {renderGlass(tileSize, tileSize)}
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#beer-tiles)" opacity={OPACITY} />

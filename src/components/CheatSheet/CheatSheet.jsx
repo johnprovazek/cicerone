@@ -45,7 +45,7 @@ export default function CheatSheet({ beer, onClose }) {
       borderRadius="2xl"
       boxShadow="xl"
       position="relative"
-      p={12}
+      p={{ base: 6, md: 12 }}
       userSelect="none"
     >
       <Box
@@ -63,11 +63,23 @@ export default function CheatSheet({ beer, onClose }) {
         <Icon as={FaXmark} boxSize={6} />
       </Box>
 
-      <Text fontSize={{ base: "2xl", md: "4xl" }} fontWeight="bold" color="gray.800" textAlign="center" mb={8}>
+      <Text
+        fontSize={{ base: "2xl", md: "4xl" }}
+        fontWeight="bold"
+        color="gray.800"
+        textAlign="center"
+        mb={{ base: 4, md: 8 }}
+      >
         {beer.style}
       </Text>
 
-      <Box boxSize={{ base: 44, md: 48 }} display="flex" alignItems="center" justifyContent="center" mb={8}>
+      <Box
+        boxSize={{ base: 32, md: 48 }}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        mb={{ base: 4, md: 8 }}
+      >
         <svg width="100%" height="100%" viewBox={`0 0 ${GLASSWARE_SVG_VIEWBOX_SIZE} ${GLASSWARE_SVG_VIEWBOX_SIZE}`}>
           <path d={beerPath} fill={beer.hex} />
           <path d={foamPath} fill={FOAM_COLOR} />

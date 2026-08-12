@@ -1,14 +1,20 @@
 import { useState, useEffect } from "react";
 
+const QUERY = "(pointer: coarse) and (hover: none)";
+
 export function useIsMobileDevice() {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.matchMedia(QUERY).matches;
+    }
+    return false;
+  });
 
   useEffect(() => {
-    const query = "(pointer: coarse) and (hover: none)";
-    const mediaQueryList = window.matchMedia(query);
-
-    const updateMatch = () => setIsMobile(mediaQueryList.matches);
-    updateMatch();
+    const mediaQueryList = window.matchMedia(QUERY);
+    const updateMatch = (event) => {
+      setIsMobile(event.matches);
+    };
 
     mediaQueryList.addEventListener("change", updateMatch);
     return () => mediaQueryList.removeEventListener("change", updateMatch);
